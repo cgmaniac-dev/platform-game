@@ -39,10 +39,10 @@ class Player {
 }
 
 class Platform {
-    constructor(){
+    constructor({x,y}){
         this.position = {
-            x: 200,
-            y: 100
+            x,
+            y
         }
 
         this.width = 200
@@ -61,7 +61,13 @@ class Platform {
 }
 
 const player = new Player()
-const platform = new Platform()
+const platforms  = [new Platform({
+    x: 200,
+    y: 100
+}),new Platform({
+    x: 500,
+    y: 200
+})]
 
 const key = {
     right: {
@@ -75,21 +81,38 @@ const key = {
 function animate(){
     requestAnimationFrame(animate)
     c.clearRect(0,0,canvas.width,canvas.height)
-    platform.draw()
+    
+    platforms.forEach(platform => {
+        platform.draw()
+    })
     player.update()
 
 
-    if (key.right.pressed){
+    if (key.right.pressed && player.position.x < 400){
         player.velocity.x = 5
-    }else if(key.left.pressed){
+    }else if(key.left.pressed && player.position.x > 100){
         player.velocity.x = -5
-    } else player.velocity.x = 0
-
-    if (player.position.y + player.height<= platform.position.y &&
-        player.position.y + player.height + player.velocity.y >= platform.position.y &&
-        (player.position.x + player.width >= platform.position.x && player.position.x <= platform.position.x+platform.width)){
-        player.velocity.y =0
+    } else {
+        player.velocity.x = 0
+        if (key.right.pressed){
+            platforms.forEach(platform => {
+                platform.position.x -=5
+            })
+        }else if(key.left.pressed){
+            platforms.forEach(platform => {
+                platform.position.x +=5
+            }) 
+        }
     }
+    platforms.forEach(platform => {
+        if (player.position.y + player.height<= platform.position.y &&
+            player.position.y + player.height + player.velocity.y >= platform.position.y &&
+            (player.position.x + player.width >= platform.position.x && 
+            player.position.x <= platform.position.x+platform.width)){
+            player.velocity.y =0
+        }
+    }) 
+    
 }
 
 animate()
@@ -97,19 +120,14 @@ animate()
 addEventListener('keydown',({keyCode})=>{
     switch(keyCode){
         case 38:
-            console.log("Up")
             player.velocity.y -=15
-            
             break
         case 40:
-            console.log("Down")
             break
         case 39:
-            console.log("Right")
             key.right.pressed = true
             break
         case 37:
-            console.log("Left")
             key.left.pressed = true
     }
 })
@@ -117,17 +135,13 @@ addEventListener('keydown',({keyCode})=>{
 addEventListener('keyup',({keyCode})=>{
     switch(keyCode){
         case 38:
-            console.log("Up")
             break
         case 40:
-            console.log("Down")
             break
         case 39:
-            console.log("Right")
             key.right.pressed = false
             break
         case 37:
-            console.log("Left")
             key.left.pressed = false
     }
 })
